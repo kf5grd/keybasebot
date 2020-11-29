@@ -1,9 +1,9 @@
 package keybasebot
 
 import (
-	"keybasebot/pkg/util"
 	"strings"
 
+	"github.com/kf5grd/keybasebot/pkg/util"
 	"samhofi.us/x/keybase/v2/types/chat1"
 )
 

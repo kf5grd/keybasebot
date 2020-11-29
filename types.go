@@ -2,8 +2,8 @@ package keybasebot
 
 import (
 	"io"
-	"keybasebot/pkg/logr"
 
+	"github.com/kf5grd/keybasebot/pkg/logr"
 	"samhofi.us/x/keybase/v2"
 	"samhofi.us/x/keybase/v2/types/chat1"
 )

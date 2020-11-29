@@ -1,7 +1,7 @@
 package keybasebot
 
 import (
-	"keybasebot/pkg/logr"
+	"github.com/kf5grd/keybasebot/pkg/logr"
 )
 
 // Run starts the bot listening for new messages

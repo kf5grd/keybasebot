@@ -90,7 +90,7 @@ func FromUser(user string) Adapter {
 func FromUsers(users []string) Adapter {
 	return func(botAction BotAction) BotAction {
 		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
-			if util.StringInSlice(m.Sender.Username, users) {
+			if !util.StringInSlice(m.Sender.Username, users) {
 				return false, nil
 			}
 			return botAction(m, b)

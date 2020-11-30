@@ -33,10 +33,11 @@ func getFrame(skipFrames int) runtime.Frame {
 
 func getCaller() string {
 	// Skip GetCallerFunctionName and the function to get the caller of
-	frame := strings.Split(getFrame(3).Function, ".")
+	frame := strings.Split(getFrame(4).Function, ".")
 	return frame[len(frame)-1]
 }
 
+// Write writes the log string to the Logger.Writer with the given name string, and Level, and returns a string with the same output in case you want to do something else with it
 func (l *Logger) Write(name string, level Level, s string, a ...interface{}) string {
 	var ret string
 	var (
@@ -62,14 +63,17 @@ func (l *Logger) Write(name string, level Level, s string, a ...interface{}) str
 	return ret
 }
 
+// Error sets the Level to LevelError, and automatically sets the name of the caller, then calls Write
 func (l *Logger) Error(s string, a ...interface{}) string {
 	return l.Write(getCaller(), LevelError, s, a...)
 }
 
+// Error sets the Level to LevelInfo, and automatically sets the name of the caller, then calls Write
 func (l *Logger) Info(s string, a ...interface{}) string {
 	return l.Write(getCaller(), LevelInfo, s, a...)
 }
 
+// Error sets the Level to LevelDebug, and automatically sets the name of the caller, then calls Write only if Logger.EnableDebug is true
 func (l *Logger) Debug(s string, a ...interface{}) string {
 	if !l.EnableDebug {
 		return ""

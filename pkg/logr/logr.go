@@ -33,7 +33,7 @@ func getFrame(skipFrames int) runtime.Frame {
 
 func getCaller() string {
 	// Skip GetCallerFunctionName and the function to get the caller of
-	frame := strings.Split(getFrame(4).Function, ".")
+	frame := strings.Split(getFrame(2).Function, ".")
 	return frame[len(frame)-1]
 }
 

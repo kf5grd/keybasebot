@@ -35,12 +35,12 @@ type Bot struct {
 	Commands      []BotCommand       // A slice holding all of you BotCommands. Be sure to populate this prior to calling Run()
 }
 
-// New returns a new Bot instance. You can pass a path to a custom home directory, which will be used by the Keybase client.
-// Passing an empty string will use the default home directory.
-func New(name string, homeDir string) *Bot {
+// New returns a new Bot instance. name will set the Bot.Name and will show up next to the bot's username in chat messages. You can set name to an empty string.
+// You can also pass in any keybase.KeybaseOpt options and they will be passed to keybase.New()
+func New(name string, opts ...keybase.KeybaseOpt) *Bot {
 	var b Bot
 	b.Name = name
-	b.KB = keybase.New(keybase.SetHomePath(homeDir))
+	b.KB = keybase.New(opts...)
 	b.Handlers = keybase.Handlers{}
 	b.Opts = keybase.RunOptions{}
 	b.Commands = make([]BotCommand, 0)

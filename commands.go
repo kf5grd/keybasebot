@@ -74,6 +74,52 @@ func MinRole(kb *keybase.Keybase, role string) Adapter {
 	}
 }
 
+// FromUser returns an Adapter that only runs a command when sent by a specific user
+func FromUser(user string) Adapter {
+	return func(botAction BotAction) BotAction {
+		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
+			if m.Sender.Username != user {
+				return false, nil
+			}
+			return botAction(m, b)
+		}
+	}
+}
+
+// FromUsers returns an Adapter that only runs a command when sent by one of a list of specific users
+func FromUsers(users []string) Adapter {
+	return func(botAction BotAction) BotAction {
+		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
+			if util.StringInSlice(m.Sender.Username, users) {
+				return false, nil
+			}
+			return botAction(m, b)
+		}
+	}
+}
+
+// Contains returns an Adapter that only runs a command when the message contains a specific word.
+func Contains(s string, ignoreCase bool, ignoreWhiteSpace bool) Adapter {
+	return func(botAction BotAction) BotAction {
+		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
+			body := m.Content.Text.Body
+			s := s
+			if ignoreCase {
+				body = strings.ToLower(body)
+				s = strings.ToLower(s)
+			}
+			if ignoreWhiteSpace {
+				body = strings.Join(strings.Fields(body), "")
+				s = strings.Join(strings.Fields(s), "")
+			}
+			if !strings.Contains(body, s) {
+				return false, nil
+			}
+			return botAction(m, b)
+		}
+	}
+}
+
 // AdvertiseCommands loops through all the bot's commands and sends their advertisements to the Keybase service
 func (b *Bot) AdvertiseCommands() {
 	var publicCommands = make([]chat1.UserBotCommandInput, 0)

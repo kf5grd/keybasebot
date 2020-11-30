@@ -8,6 +8,15 @@ import (
 	"samhofi.us/x/keybase/v2/types/chat1"
 )
 
+func StringInSlice(needle string, haystack []string) bool {
+	for _, item := range haystack {
+		if item == needle {
+			return true
+		}
+	}
+	return false
+}
+
 func ChannelString(channel chat1.ChatChannel) string {
 	if channel.MembersType == keybase.USER {
 		return channel.Name

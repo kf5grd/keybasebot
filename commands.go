@@ -9,7 +9,12 @@ import (
 	"samhofi.us/x/keybase/v2/types/chat1"
 )
 
-// Adapt loops through a set of Adapters and runs them on a given BotAction
+// Adapt loops through a set of Adapters and runs them on a given BotAction in the order
+// that they're provided. It's important to make sure you're passing adapters in the
+// correct order as some things will need to be checked before others. As an example, the
+// Contains adapter assumes that the incoming message has a MessageType of "text." If we
+// pass that adapter prior to passing the MessageType adapter, then we will end up with a
+// panic any time a message comes through with a MessageType other than "text."
 func Adapt(b BotAction, adapters ...Adapter) BotAction {
 	for i := len(adapters) - 1; i >= 0; i-- {
 		b = adapters[i](b)
@@ -29,9 +34,9 @@ func MessageType(typeName string) Adapter {
 	}
 }
 
-// CommandPrefix returns an Adapter that specifies the specific prefix that this command responds to.
-// Note that this will often require that MessageType is called _before_ this adapter
-// to avoid a panic.
+// CommandPrefix returns an Adapter that specifies the specific prefix that this command
+// responds to. Note that this will often require that MessageType is called _before_ this
+// adapter to avoid a panic.
 func CommandPrefix(prefix string) Adapter {
 	return func(botAction BotAction) BotAction {
 		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
@@ -43,9 +48,9 @@ func CommandPrefix(prefix string) Adapter {
 	}
 }
 
-// ReactionTrigger returns an Adapter that specifies the specific reaction that this command responds to.
-// Note that you do not need to use the MessageType adapter when using this as we will
-// already be checking to make sure the message type is a reaction.
+// ReactionTrigger returns an Adapter that specifies the specific reaction that this
+// command responds to. Note that you do not need to use the MessageType adapter when using
+// this as we will already be checking to make sure the message type is a reaction.
 func ReactionTrigger(trigger string) Adapter {
 	return func(botAction BotAction) BotAction {
 		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
@@ -60,9 +65,9 @@ func ReactionTrigger(trigger string) Adapter {
 	}
 }
 
-// MinRole returns an Adapter that restricts a command to users with _at least_ the specified role.
-// Note that this _must_ be called _after_ CommandPrefix because this assumes that we
-// already know we're executing the provided command.
+// MinRole returns an Adapter that restricts a command to users with _at least_ the
+// specified role. Note that this _must_ be called _after_ CommandPrefix because this
+// assumes that we already know we're executing the provided command.
 func MinRole(kb *keybase.Keybase, role string) Adapter {
 	return func(botAction BotAction) BotAction {
 		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
@@ -86,7 +91,8 @@ func FromUser(user string) Adapter {
 	}
 }
 
-// FromUsers returns an Adapter that only runs a command when sent by one of a list of specific users
+// FromUsers returns an Adapter that only runs a command when sent by one of a list of
+// specific users
 func FromUsers(users []string) Adapter {
 	return func(botAction BotAction) BotAction {
 		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
@@ -98,7 +104,8 @@ func FromUsers(users []string) Adapter {
 	}
 }
 
-// Contains returns an Adapter that only runs a command when the message contains a specific word.
+// Contains returns an Adapter that only runs a command when the message contains a
+// specific word.
 func Contains(s string, ignoreCase bool, ignoreWhiteSpace bool) Adapter {
 	return func(botAction BotAction) BotAction {
 		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
@@ -120,7 +127,8 @@ func Contains(s string, ignoreCase bool, ignoreWhiteSpace bool) Adapter {
 	}
 }
 
-// AdvertiseCommands loops through all the bot's commands and sends their advertisements to the Keybase service
+// AdvertiseCommands loops through all the bot's commands and sends their advertisements
+// to the Keybase service
 func (b *Bot) AdvertiseCommands() {
 	var publicCommands = make([]chat1.UserBotCommandInput, 0)
 	for _, ad := range b.Commands {

@@ -23,15 +23,16 @@ func (b *Bot) chatHandler(m chat1.MsgSummary) {
 		return
 	}
 
-	// If CommandPrefix is set and message is a text message, make sure it has the correct prefix
+	// If CommandPrefix is set and message is a text message, make sure it has the
+	// correct prefix
 	if b.CommandPrefix != "" && m.Content.TypeName == "text" {
 		if !strings.HasPrefix(m.Content.Text.Body, b.CommandPrefix) {
 			return
 		}
 	}
 
-	// Cycle through each action and run them until we find one that indicates the incoming message triggers it,
-	// then break out
+	// Cycle through each action and run them until we find one that indicates the
+	// incoming message triggers it, then break out
 	b.Logger.Debug("Incoming message from %s", sender)
 	for _, action := range b.Commands {
 		actionName := action.Name

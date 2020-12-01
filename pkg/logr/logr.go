@@ -68,12 +68,12 @@ func (l *Logger) Error(s string, a ...interface{}) string {
 	return l.Write(getCaller(), LevelError, s, a...)
 }
 
-// Error sets the Level to LevelInfo, and automatically sets the name of the caller, then calls Write
+// Info sets the Level to LevelInfo, and automatically sets the name of the caller, then calls Write
 func (l *Logger) Info(s string, a ...interface{}) string {
 	return l.Write(getCaller(), LevelInfo, s, a...)
 }
 
-// Error sets the Level to LevelDebug, and automatically sets the name of the caller, then calls Write only if Logger.EnableDebug is true
+// Debug sets the Level to LevelDebug, and automatically sets the name of the caller, then calls Write only if Logger.EnableDebug is true
 func (l *Logger) Debug(s string, a ...interface{}) string {
 	if !l.EnableDebug {
 		return ""

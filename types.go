@@ -27,16 +27,17 @@ type Adapter func(BotAction) BotAction
 
 // Bot is where we'll hold the necessary information for the bot to run
 type Bot struct {
-	Name          string             // This will show up next to the bot's username in chat messages
-	CommandPrefix string             // If this is set, any messages that are received with a Text type that do not have this string prefix will be discarded. This can be useful if all of your commands start with the same prefix.
-	KB            *keybase.Keybase   // The Keybase instance
-	Logger        *logr.Logger       // The logr instance
-	LogWriter     io.Writer          // Where you want log messages sent
-	JSON          bool               // Whether log messages should be in JSON format
-	Debug         bool               // Whether to show debug messages in log output
-	Handlers      keybase.Handlers   // Message handlers. You probably should leave the Chat handler alone
-	Opts          keybase.RunOptions // Custom run options for the message listener
-	Commands      []BotCommand       // A slice holding all of you BotCommands. Be sure to populate this prior to calling Run()
+	Name          string                 // This will show up next to the bot's username in chat messages
+	CommandPrefix string                 // If this is set, any messages that are received with a Text type that do not have this string prefix will be discarded. This can be useful if all of your commands start with the same prefix.
+	KB            *keybase.Keybase       // The Keybase instance
+	Logger        *logr.Logger           // The logr instance
+	LogWriter     io.Writer              // Where you want log messages sent
+	JSON          bool                   // Whether log messages should be in JSON format
+	Debug         bool                   // Whether to show debug messages in log output
+	Handlers      keybase.Handlers       // Message handlers. You probably should leave the Chat handler alone
+	Opts          keybase.RunOptions     // Custom run options for the message listener
+	Commands      []BotCommand           // A slice holding all of you BotCommands. Be sure to populate this prior to calling Run()
+	Meta          map[string]interface{} // You can use this to store custom info in order to pass it around to your bot commands
 }
 
 // New returns a new Bot instance. name will set the Bot.Name and will show up next to the bot's username in chat messages. You can set name to an empty string.

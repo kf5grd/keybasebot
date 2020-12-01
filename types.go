@@ -80,6 +80,7 @@ func New(name string, opts ...keybase.KeybaseOpt) *Bot {
 	b.Handlers = keybase.Handlers{}
 	b.Opts = keybase.RunOptions{}
 	b.Commands = make([]BotCommand, 0)
+	b.Meta = make(map[string]interface{})
 
 	return &b
 }

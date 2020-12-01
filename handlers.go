@@ -31,19 +31,21 @@ func (b *Bot) chatHandler(m chat1.MsgSummary) {
 		}
 	}
 
-	// Cycle through each action and run them until we find one that indicates the
-	// incoming message triggers it, then break out
+	// Cycle through each action and run them until we reach the end, or until a command
+	// requests to stop execution of subsequent commands
 	b.Logger.Debug("Incoming message from %s", sender)
 	for _, action := range b.Commands {
 		actionName := action.Name
 		b.Logger.Debug("Trying %s", actionName)
 		ok, err := action.Run(m, b)
-		if ok {
-			b.Logger.Debug("%s ok = true", actionName)
-			if err != nil {
-				b.Logger.Error("[%v][%s in %s] %s returned error: %v", m.ConvID, sender, channel, actionName, err)
+		if err != nil {
+			b.Logger.Error("[%v][%s in %s] %s returned error: %v", m.ConvID, sender, channel, actionName, err)
+			if ok {
 				b.KB.ReplyByConvID(m.ConvID, m.Id, err.Error())
 			}
+		}
+		if ok {
+			b.Logger.Debug("%s ok = true, stopping cancelling execution of subsequent commands", actionName)
 			return
 		}
 	}

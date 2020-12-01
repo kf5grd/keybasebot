@@ -8,7 +8,11 @@ import (
 	"samhofi.us/x/keybase/v2/types/chat1"
 )
 
-// BotAction is a function that's run when a command is received by the bot
+// BotAction is a function that's run when a command is received by the bot. If the boolean
+// return is true, the bot will not attempt to execute any other commands after this one.
+// If an error is returned, it will be sent to the logger. If an error is returned and the
+// boolean is also set to true, the returned error will be sent back to the chat as a reply
+// to the message that triggered the command.
 type BotAction func(chat1.MsgSummary, *Bot) (bool, error)
 
 // BotCommand holds information regarding a command and its advertisements

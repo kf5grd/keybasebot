@@ -172,6 +172,11 @@ func (b *Bot) AdvertiseCommands() {
 		}
 	}
 
+	if len(publicCommands) == 0 {
+		b.Logger.Debug("Bot has no command advertisements")
+		return
+	}
+
 	public := chat1.AdvertiseCommandAPIParam{
 		Typ:      "public",
 		Commands: publicCommands,

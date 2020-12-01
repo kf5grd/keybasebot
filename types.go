@@ -25,7 +25,7 @@ type BotCommand struct {
 // Adapter can modify the behavior of a BotAction
 type Adapter func(BotAction) BotAction
 
-// Bot is where we'll hold the neccessary information for the bot to run
+// Bot is where we'll hold the necessary information for the bot to run
 type Bot struct {
 	Name          string             // This will show up next to the bot's username in chat messages
 	CommandPrefix string             // If this is set, any messages that are received with a Text type that do not have this string prefix will be discarded. This can be useful if all of your commands start with the same prefix.

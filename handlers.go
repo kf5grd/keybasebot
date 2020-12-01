@@ -45,7 +45,7 @@ func (b *Bot) chatHandler(m chat1.MsgSummary) {
 			}
 		}
 		if ok {
-			b.Logger.Debug("%s ok = true, stopping cancelling execution of subsequent commands", actionName)
+			b.Logger.Debug("%s ok = true, cancelling execution of subsequent commands", actionName)
 			return
 		}
 	}

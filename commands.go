@@ -26,9 +26,12 @@ func Adapt(b BotAction, adapters ...Adapter) BotAction {
 func MessageType(typeName string) Adapter {
 	return func(botAction BotAction) BotAction {
 		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
+			b.Logger.Debug("Verifying message type is '%s'", typeName)
 			if m.Content.TypeName != typeName {
+				b.Logger.Debug("Message type is '%s', exiting command", m.Content.TypeName)
 				return false, nil
 			}
+			b.Logger.Debug("Message type is '%s', continuing", typeName)
 			return botAction(m, b)
 		}
 	}
@@ -40,9 +43,12 @@ func MessageType(typeName string) Adapter {
 func CommandPrefix(prefix string) Adapter {
 	return func(botAction BotAction) BotAction {
 		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
+			b.Logger.Debug("Verifying message contains prefix '%s'", prefix)
 			if !strings.HasPrefix(m.Content.Text.Body, prefix) {
+				b.Logger.Debug("Message does not contain prefix '%s', exiting command", prefix)
 				return false, nil
 			}
+			b.Logger.Debug("Message does contain prefix '%s', continuing", prefix)
 			return botAction(m, b)
 		}
 	}
@@ -54,12 +60,17 @@ func CommandPrefix(prefix string) Adapter {
 func ReactionTrigger(trigger string) Adapter {
 	return func(botAction BotAction) BotAction {
 		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
+			b.Logger.Debug("Verifying message type is 'reaction'")
 			if m.Content.TypeName != "reaction" {
+				b.Logger.Debug("Message type is '%s', exiting command", m.Content.TypeName)
 				return false, nil
 			}
+			b.Logger.Debug("Verifying reaction body is '%s'", trigger)
 			if m.Content.Reaction.Body != trigger {
+				b.Logger.Debug("Reaction body is '%s', exiting command", m.Content.Reaction.Body)
 				return false, nil
 			}
+			b.Logger.Debug("Reaction body is '%s', continuing", m.Content.Reaction.Body)
 			return botAction(m, b)
 		}
 	}
@@ -71,9 +82,12 @@ func ReactionTrigger(trigger string) Adapter {
 func MinRole(kb *keybase.Keybase, role string) Adapter {
 	return func(botAction BotAction) BotAction {
 		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
+			b.Logger.Debug("Verifying user '%s' has minimum role '%s' in '%s'", m.Sender.Username, role, util.ChannelString(m.Channel))
 			if !util.HasMinRole(kb, role, m.Sender.Username, m.ConvID) {
+				b.Logger.Debug("User '%s' does not have minimum role '%s' in '%s', exiting command and replying with error", m.Sender.Username, role, util.ChannelString(m.Channel))
 				return true, fmt.Errorf("Your role must be at least %s to do that.", role)
 			}
+			b.Logger.Debug("User '%s' has minimum role '%s' in '%s', continuing", m.Sender.Username, role, util.ChannelString(m.Channel))
 			return botAction(m, b)
 		}
 	}
@@ -83,9 +97,12 @@ func MinRole(kb *keybase.Keybase, role string) Adapter {
 func FromUser(user string) Adapter {
 	return func(botAction BotAction) BotAction {
 		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
+			b.Logger.Debug("Verifying received message was sent by '%s'", user)
 			if m.Sender.Username != user {
+				b.Logger.Debug("Received message was sent by '%s', exiting command", m.Sender.Username)
 				return false, nil
 			}
+			b.Logger.Debug("Received message was sent by '%s', continuing", user)
 			return botAction(m, b)
 		}
 	}
@@ -96,21 +113,37 @@ func FromUser(user string) Adapter {
 func FromUsers(users []string) Adapter {
 	return func(botAction BotAction) BotAction {
 		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
+			b.Logger.Debug("Verifying received message was sent by one of '%s'", strings.Join(users, ","))
 			if !util.StringInSlice(m.Sender.Username, users) {
+				b.Logger.Debug("Received message was sent by '%s', exiting command", m.Sender.Username)
 				return false, nil
 			}
+			b.Logger.Debug("Received message was sent by '%s', continuing", m.Sender.Username)
 			return botAction(m, b)
 		}
 	}
 }
 
 // Contains returns an Adapter that only runs a command when the message contains a
-// specific word.
+// specific string. This will also make sure the received message has a type of 'text' or
+// 'edit'
 func Contains(s string, ignoreCase bool, ignoreWhiteSpace bool) Adapter {
 	return func(botAction BotAction) BotAction {
 		return func(m chat1.MsgSummary, b *Bot) (bool, error) {
-			body := m.Content.Text.Body
-			s := s
+			b.Logger.Debug("Verifying message contains '%s'", s)
+			var body string
+
+			switch m.Content.TypeName {
+			case "text":
+				body = m.Content.Text.Body
+			case "edit":
+				body = m.Content.Edit.Body
+			default:
+				b.Logger.Debug("Received message does not have type 'text' or 'edit', exiting command")
+				return false, nil
+			}
+
+			var s = s
 			if ignoreCase {
 				body = strings.ToLower(body)
 				s = strings.ToLower(s)
@@ -120,8 +153,10 @@ func Contains(s string, ignoreCase bool, ignoreWhiteSpace bool) Adapter {
 				s = strings.Join(strings.Fields(s), "")
 			}
 			if !strings.Contains(body, s) {
+				b.Logger.Debug("Message does not contain '%s', exiting command", s)
 				return false, nil
 			}
+			b.Logger.Debug("Message does contain '%s', continuing", s)
 			return botAction(m, b)
 		}
 	}

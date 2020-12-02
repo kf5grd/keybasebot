@@ -32,8 +32,8 @@ func main() {
 	b.Commands = append(b.Commands,
 		bot.BotCommand{
 			Name: "SetMessage",
-			Ad:   &SetMessageAd,
-			Run: bot.Adapt(SetMessage,
+			Ad:   &setMessageAd,
+			Run: bot.Adapt(setMessage,
 				// this command can only be triggered by messages with
 				// the "text" type...
 				bot.MessageType("text"),
@@ -44,8 +44,8 @@ func main() {
 		},
 		bot.BotCommand{
 			Name: "GetMessage",
-			Ad:   &GetMessageAd,
-			Run: bot.Adapt(GetMessage,
+			Ad:   &getMessageAd,
+			Run: bot.Adapt(getMessage,
 				// this command can only be triggered by messages with
 				// the "text" type...
 				bot.MessageType("text"),
@@ -60,13 +60,13 @@ func main() {
 	b.Run()
 }
 
-var SetMessageAd = chat1.UserBotCommandInput{
+var setMessageAd = chat1.UserBotCommandInput{
 	Name:        "set",
 	Usage:       "<message>",
 	Description: "Set a message that can be displayed with the `!get` command",
 }
 
-func SetMessage(m chat1.MsgSummary, b *bot.Bot) (bool, error) {
+func setMessage(m chat1.MsgSummary, b *bot.Bot) (bool, error) {
 	message := strings.TrimSpace(strings.Replace(m.Content.Text.Body, "!set", "", 1))
 	if message == "" {
 		err := fmt.Errorf("Must provide a message.")
@@ -85,12 +85,12 @@ func SetMessage(m chat1.MsgSummary, b *bot.Bot) (bool, error) {
 	return true, nil
 }
 
-var GetMessageAd = chat1.UserBotCommandInput{
+var getMessageAd = chat1.UserBotCommandInput{
 	Name:        "get",
 	Description: "Get the message that was set with the `!set` command",
 }
 
-func GetMessage(m chat1.MsgSummary, b *bot.Bot) (bool, error) {
+func getMessage(m chat1.MsgSummary, b *bot.Bot) (bool, error) {
 	// fetch the message
 	message, ok := b.Meta["message"]
 	if !ok {

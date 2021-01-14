@@ -87,12 +87,14 @@ func main() {
 	b.Run()
 }
 
+// Advertisements for setMessage
 var setMessageAd = chat1.UserBotCommandInput{
 	Name:        "set",
 	Usage:       "<message>",
 	Description: "Set a message that can be displayed with the `!get` command",
 }
 
+// setMessage stores our message
 func setMessage(m chat1.MsgSummary, b *bot.Bot) (bool, error) {
 	message := strings.TrimSpace(strings.Replace(m.Content.Text.Body, "!set", "", 1))
 	if message == "" {
@@ -112,11 +114,13 @@ func setMessage(m chat1.MsgSummary, b *bot.Bot) (bool, error) {
 	return true, nil
 }
 
+// Advertisements for getMessage
 var getMessageAd = chat1.UserBotCommandInput{
 	Name:        "get",
 	Description: "Get the message that was set with the `!set` command",
 }
 
+// getMessage retrieves our message
 func getMessage(m chat1.MsgSummary, b *bot.Bot) (bool, error) {
 	// fetch the message
 	message, ok := b.Meta["message"]

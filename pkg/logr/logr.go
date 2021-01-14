@@ -81,5 +81,8 @@ func (l *Logger) Info(s string, a ...interface{}) Msg {
 
 // Debug sets the Level to LevelDebug, and automatically sets the name of the caller, then calls Write only if Logger.EnableDebug is true
 func (l *Logger) Debug(s string, a ...interface{}) Msg {
+	if !l.EnableDebug {
+		return Msg{}
+	}
 	return l.Write(getCaller(), LevelDebug, s, a...)
 }

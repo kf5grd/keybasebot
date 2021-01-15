@@ -52,6 +52,10 @@ type Bot struct {
 	// Where you want log messages written to
 	LogWriter io.Writer
 
+	// If LogConv is not empty, log messages will be sent to this conversation, in addition to
+	// the LogWriter
+	LogConv chat1.ConvIDStr
+
 	// Whether log messages should be in JSON format
 	JSON bool
 
@@ -66,10 +70,6 @@ type Bot struct {
 
 	// A slice holding all of you BotCommands. Be sure to populate this prior to calling Run()
 	Commands []BotCommand
-
-	// If LogConv is not empty, log messages will be sent to this conversation, in addition to
-	// the LogWriter
-	LogConv chat1.ConvIDStr
 
 	// You can use this to store custom info in order to pass it around to your bot commands
 	Meta map[string]interface{}
@@ -95,12 +95,20 @@ func New(name string, opts ...keybase.KeybaseOpt) *Bot {
 type convWriter struct {
 	ConvID chat1.ConvIDStr
 	Writer io.Writer
-	ch     chan string
+	KB     *keybase.Keybase
 }
 
 // Write sends log message strings to a channel
 func (cw convWriter) Write(p []byte) (n int, err error) {
-	cw.ch <- string(p)
+	if cw.ConvID != "" {
+		opts := keybase.SendMessageOptions{
+			ConversationID: cw.ConvID,
+			NonBlock:       true,
+			Message:        keybase.SendMessageBody{Body: string(p)},
+		}
+		cw.KB.SendMessage("send", opts)
+	}
+
 	fmt.Fprintf(cw.Writer, string(p))
 	return len(p), nil
 }

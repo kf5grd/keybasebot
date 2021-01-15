@@ -1,6 +1,7 @@
 package keybasebot
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/kf5grd/keybasebot/pkg/logr"
@@ -51,6 +52,10 @@ type Bot struct {
 	// Where you want log messages written to
 	LogWriter io.Writer
 
+	// If LogConv is not empty, log messages will be sent to this conversation, in addition to
+	// the LogWriter
+	LogConv chat1.ConvIDStr
+
 	// Whether log messages should be in JSON format
 	JSON bool
 
@@ -83,4 +88,27 @@ func New(name string, opts ...keybase.KeybaseOpt) *Bot {
 	b.Meta = make(map[string]interface{})
 
 	return &b
+}
+
+// We'll use this to create a writer for the Logger which will be able to write logs to
+// stdout, and optionally also to a Keybase chat conversation
+type convWriter struct {
+	ConvID chat1.ConvIDStr
+	Writer io.Writer
+	KB     *keybase.Keybase
+}
+
+// Write sends log message strings to a channel
+func (cw convWriter) Write(p []byte) (n int, err error) {
+	if cw.ConvID != "" {
+		opts := keybase.SendMessageOptions{
+			ConversationID: cw.ConvID,
+			NonBlock:       true,
+			Message:        keybase.SendMessageBody{Body: string(p)},
+		}
+		cw.KB.SendMessage("send", opts)
+	}
+
+	fmt.Fprintf(cw.Writer, string(p))
+	return len(p), nil
 }

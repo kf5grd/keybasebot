@@ -1,2 +1,67 @@
 * keybasebot
 keybasebot is a framework for easily creating interactive chat bots for Keybase
+
+** Usage
+For a full example of a bot written with this framework, see the examples folder.
+
+*** A Basic Bot
+**** Create a bot instance
+#+BEGIN_SRC go
+  // The bot name will show up next to your bot's username in conversations
+  botName := "Example Bot"
+  b := bot.New(botName)
+  b.LogWriter = os.Stdout
+#+END_SRC
+
+**** BotCommands
+BotCommands consist of 3 fields:
+- =Name=: The name of the command, mostly for logging purposes
+- =Ad=: The [[https://pkg.go.dev/samhofi.us/x/keybase/v2/types/chat1#UserBotCommandInput][advertisement]] that displays in the Keybase client when a user starts to type the command
+- =Run=: The [[https://pkg.go.dev/github.com/kf5grd/keybasebot#BotAction][BotAction]] that gets called when the command is triggered
+  - BotActions can also be modified on the fly by [[https://pkg.go.dev/github.com/kf5grd/keybasebot#Adapter][Adapters]], which are basically middleware for your bot commands
+
+#+BEGIN_SRC go
+    // Advertisements for cmdPing
+    var cmdPingAd = chat1.UserBotCommandInput{
+            Name:        "ping", // the command's trigger
+            Description: "I will reply with `Pong!`",
+    }
+
+    // cmdPing is a BotAction that replies with "Pong!"
+    func cmdPing(m chat1.MsgSummary, b *bot.Bot) (bool, error) {
+            b.KB.ReplyByConvID(m.ConvID, m.Id, "Pong!")
+
+            // 'true' tells the bot not to look for any more commands, and 'nil' means there were no
+            // errors
+            return true, nil
+    }
+
+    b.Commands = append(b.Commands,
+            bot.BotCommand{
+                    Name: "Ping",
+                    Ad:   &cmdPingAd,
+                  
+                    // By using the bot.Adapt() function in our Run field, we're allowing the
+                    // cmdPing BotAction to be modified by any adapters we pass to this
+                    // command. In this case, we're using the MessageType adapter, which
+                    // checks that the recieved message was of a specific message type, and
+                    // the CommandPrefix adapter, which checks that the incoming message
+                    // (which must have a "text" message type) begins with a certain string.
+                    // If either of these adapters fail (that is, if the message does not
+                    // have a message type of "text", or the message text does not begin
+                    // with the string "!ping"), they will return an error and the bot will
+                    // try to run the next command in the b.Commands slice. As long as both
+                    // adapters are successful, the cmdPing BotAction will be executed.
+                    Run: bot.Adapt(cmdPing, 
+                                  bot.MessageType("text"),
+                                  bot.CommandPrefix("!ping"),
+                    ),
+            },
+    }
+#+END_SRC
+
+**** Running the bot
+Once your bot instance is set up, call the =Run()= command
+#+BEGIN_SRC go
+  b.Run()
+#+END_SRC

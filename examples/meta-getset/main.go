@@ -15,23 +15,6 @@ import (
 	"samhofi.us/x/keybase/v2/types/chat1"
 )
 
-// We'll use this to create a writer for the Logger which will be able to write logs to
-// stdout, and optionally also to a Keybase chat conversation
-type kbWriter struct {
-	convID chat1.ConvIDStr
-	bot    *bot.Bot
-}
-
-func (k kbWriter) Write(p []byte) (n int, err error) {
-	opt := keybase.SendMessageOptions{
-		ConversationID: k.convID,
-		Message:        keybase.SendMessageBody{Body: string(p)},
-	}
-	go k.bot.KB.SendMessage("send", opt)
-	fmt.Fprintf(os.Stdout, string(p))
-	return len(p), nil
-}
-
 func main() {
 	// setup flags
 	var homePath = flag.String("home", "", "Set custom home directory for the Keybase client")
@@ -44,16 +27,8 @@ func main() {
 	b := bot.New("", keybase.SetHomePath(*homePath))
 	b.Debug = *debug
 	b.JSON = *json
-
-	// setup the log writer
-	w := kbWriter{
-		// if convID is empty (which is the default) then logs will only be written to stdout,
-		// but if a conversation id is passed here then logs will be written to stdout *and*
-		// this conversation
-		convID: chat1.ConvIDStr(*logConv),
-		bot:    b,
-	}
-	b.LogWriter = w
+	b.LogConv = chat1.ConvIDStr(*logConv)
+	b.LogWriter = os.Stdout
 
 	// register the bot's commands
 	b.Commands = append(b.Commands,

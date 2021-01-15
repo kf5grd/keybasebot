@@ -22,7 +22,10 @@ func (b *Bot) Run() error {
 		ch:     make(chan string, 100),
 		Writer: b.LogWriter,
 	}
-	go b.sendLogMessages(logWriter.ch)
+	// only send log messages to Keybase if LogConv is not empty
+	if b.LogConv != "" {
+		go b.sendLogMessages(logWriter.ch)
+	}
 	b.Logger = logr.New(logWriter, b.Debug, b.JSON)
 
 	b.registerHandlers()

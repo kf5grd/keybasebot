@@ -1,6 +1,11 @@
 * keybasebot
 keybasebot is a framework for easily creating interactive chat bots for Keybase
 
+** Helpful Links
+- [[https://pkg.go.dev/github.com/kf5grd/keybasebot][GoDoc]] - Documentation for this package on the [[https://pkg.go.dev/][pkg.go.dev]] website
+- [[https://pkg.go.dev/samhofi.us/x/keybase/v2][Keybase Library]] - This framework is written around a Keybase library I wrote, and you'll likely need to use this along with this bot framework
+- [[https://keybase.io/team/mkbot][mkbot]] - Keybase bot community. Come say "Hi" and show off your bots, or ask for help
+
 ** Usage
 For a full example of a bot written with this framework, see the examples folder.
 

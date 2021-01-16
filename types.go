@@ -25,6 +25,19 @@ type BotCommand struct {
 	// message box. Set this to nil if you don't want the command advertised
 	Ad *chat1.UserBotCommandInput
 
+	// AdType can be one of "public", "teamconvs", and "teammembers". If AdType is empty or
+	// unknown, it will default to "public". If AdType is one of "teamconvs" or "teammembers",
+	// be sure to specify the corresponding team name in AdTeamName. Note: These settings only
+	// restrict where the advertisements will show. You will still need to either use
+	// appropriate Adapters, or write your BotAction in a way that limits where the commands
+	// can be called from if that is your intention
+	AdType string
+
+	// If AdType is one of "teamconvs" or "teammembers", be sure to enter a team name in
+	// AdTeamName, which will restrict your commands to either be advertised in this team, or
+	// only be advertised to members of this team
+	AdTeamName string
+
 	// The function to run when the command is triggered
 	Run BotAction
 }

@@ -165,25 +165,63 @@ func Contains(s string, ignoreCase bool, ignoreWhiteSpace bool) Adapter {
 // AdvertiseCommands loops through all the bot's commands and sends their advertisements
 // to the Keybase service
 func (b *Bot) AdvertiseCommands() {
+	var teamconvsCommands = make(map[string][]chat1.UserBotCommandInput)
+	var teammembersCommands = make(map[string][]chat1.UserBotCommandInput)
 	var publicCommands = make([]chat1.UserBotCommandInput, 0)
 	for _, ad := range b.Commands {
 		if adRes := ad.Ad; adRes != nil {
-			publicCommands = append(publicCommands, *adRes)
+			switch ad.AdType {
+			case "teamconvs":
+				t := strings.ToLower(ad.AdTeamName)
+				if _, ok := teamconvsCommands[t]; ok {
+					teamconvsCommands[t] = append(teamconvsCommands[t], *adRes)
+				} else {
+					teamconvsCommands[t] = []chat1.UserBotCommandInput{*adRes}
+				}
+			case "teammembers":
+				t := strings.ToLower(ad.AdTeamName)
+				if _, ok := teammembersCommands[t]; ok {
+					teammembersCommands[t] = append(teammembersCommands[t], *adRes)
+				} else {
+					teammembersCommands[t] = []chat1.UserBotCommandInput{*adRes}
+				}
+			default: // "public", "", or something else
+				publicCommands = append(publicCommands, *adRes)
+			}
 		}
 	}
 
-	if len(publicCommands) == 0 {
+	if len(teamconvsCommands)+len(teammembersCommands)+len(publicCommands) == 0 {
 		b.Logger.Debug("Bot has no command advertisements")
 		return
 	}
 
-	public := chat1.AdvertiseCommandAPIParam{
-		Typ:      "public",
-		Commands: publicCommands,
+	publishAds := make([]chat1.AdvertiseCommandAPIParam, 0)
+	if len(teamconvsCommands) > 0 {
+		for team, commands := range teamconvsCommands {
+			b.Logger.Debug("Publishing %d teamconvs ads for team %s", len(commands), team)
+			publishAds = append(publishAds, chat1.AdvertiseCommandAPIParam{
+				TeamName: team,
+				Typ:      "teamconvs",
+				Commands: commands,
+			})
+		}
 	}
-
-	publishAds := []chat1.AdvertiseCommandAPIParam{
-		public,
+	if len(teammembersCommands) > 0 {
+		for team, commands := range teammembersCommands {
+			b.Logger.Debug("Publishing %d teammembers ads for team %s", len(commands), team)
+			publishAds = append(publishAds, chat1.AdvertiseCommandAPIParam{
+				TeamName: team,
+				Typ:      "teammembers",
+				Commands: commands,
+			})
+		}
+	}
+	if len(publicCommands) > 0 {
+		publishAds = append(publishAds, chat1.AdvertiseCommandAPIParam{
+			Typ:      "public",
+			Commands: publicCommands,
+		})
 	}
 
 	ads := keybase.AdvertiseCommandsOptions{

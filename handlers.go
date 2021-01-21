@@ -18,8 +18,8 @@ func (b *Bot) chatHandler(m chat1.MsgSummary) {
 		channel = util.ChannelString(m.Channel)
 	)
 
-	// If message comes from the bot, ignore it
-	if sender == b.KB.Username {
+	// If message comes from the bot, and b.AllowSelfMessages is false, ignore the message
+	if sender == b.KB.Username && !b.AllowSelfMessages {
 		return
 	}
 

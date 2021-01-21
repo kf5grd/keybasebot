@@ -86,6 +86,12 @@ type Bot struct {
 
 	// You can use this to store custom info in order to pass it around to your bot commands
 	Meta map[string]interface{}
+
+	// Setting this to true allows the bot to react to its own messages. You'll need to be
+	// careful with your commands when enabling this to make sure your bot doesn't get stuck
+	// in a loop attempting to verify its own message, then sending an error, then trying to
+	// verify, etc.
+	AllowSelfMessages bool
 }
 
 // New returns a new Bot instance. name will set the Bot.Name and will show up next to the

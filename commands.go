@@ -167,6 +167,7 @@ func Contains(s string, ignoreCase bool, ignoreWhiteSpace bool) Adapter {
 func (b *Bot) AdvertiseCommands() {
 	var teamconvsCommands = make(map[string][]chat1.UserBotCommandInput)
 	var teammembersCommands = make(map[string][]chat1.UserBotCommandInput)
+	var convCommands = make(map[chat1.ConvIDStr][]chat1.UserBotCommandInput)
 	var publicCommands = make([]chat1.UserBotCommandInput, 0)
 	for _, ad := range b.Commands {
 		if adRes := ad.Ad; adRes != nil {
@@ -185,13 +186,20 @@ func (b *Bot) AdvertiseCommands() {
 				} else {
 					teammembersCommands[t] = []chat1.UserBotCommandInput{*adRes}
 				}
+			case "conv":
+				c := ad.AdConv
+				if _, ok := convCommands[c]; ok {
+					convCommands[c] = append(convCommands[c], *adRes)
+				} else {
+					convCommands[c] = []chat1.UserBotCommandInput{*adRes}
+				}
 			default: // "public", "", or something else
 				publicCommands = append(publicCommands, *adRes)
 			}
 		}
 	}
 
-	if len(teamconvsCommands)+len(teammembersCommands)+len(publicCommands) == 0 {
+	if len(teamconvsCommands)+len(teammembersCommands)+len(convCommands)+len(publicCommands) == 0 {
 		b.Logger.Debug("Bot has no command advertisements")
 		return
 	}
@@ -213,6 +221,16 @@ func (b *Bot) AdvertiseCommands() {
 			publishAds = append(publishAds, chat1.AdvertiseCommandAPIParam{
 				TeamName: team,
 				Typ:      "teammembers",
+				Commands: commands,
+			})
+		}
+	}
+	if len(convCommands) > 0 {
+		for conv, commands := range convCommands {
+			b.Logger.Debug("Publishing %d conv ads for conversation %s", len(commands), conv)
+			publishAds = append(publishAds, chat1.AdvertiseCommandAPIParam{
+				ConvID:   conv,
+				Typ:      "conv",
 				Commands: commands,
 			})
 		}

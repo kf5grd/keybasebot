@@ -3,6 +3,7 @@ package keybasebot
 import (
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/kf5grd/keybasebot/pkg/logr"
 	"samhofi.us/x/keybase/v2"
@@ -49,6 +50,9 @@ type BotCommand struct {
 
 // Adapter can modify the behavior of a BotAction
 type Adapter func(BotAction) BotAction
+
+// JobAction is a function that can be run by the JobQueue
+type JobAction func(b *Bot) error
 
 // Bot is where we'll hold the necessary information for the bot to run
 type Bot struct {
@@ -110,6 +114,11 @@ func New(name string, opts ...keybase.KeybaseOpt) *Bot {
 	b.Opts = keybase.RunOptions{}
 	b.Commands = make([]BotCommand, 0)
 	b.Meta = make(map[string]interface{})
+
+	// Implement a default logger that logs to stdout with debug enabled and json disabled.
+	// This will get replaced with the user's configured logger when bot.Run() is called.
+	// Without this, it is impossible to pass anything to the logger before calling bot.Run() without having the program panic
+	b.Logger = logr.New(os.Stdout, true, false)
 
 	return &b
 }

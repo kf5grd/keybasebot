@@ -22,6 +22,14 @@ func (b *Bot) Run() error {
 	defer b.ClearCommands()
 
 	b.Logger.Info("Running as user %s", b.KB.Username)
+	b.running = true
 	b.KB.Run(b.Handlers, &b.Opts)
+	b.running = false
+
 	return nil
+}
+
+// Running indicates whether the bot is currently running
+func (b *Bot) Running() bool {
+	return b.running
 }

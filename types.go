@@ -101,6 +101,9 @@ type Bot struct {
 	// in a loop attempting to verify its own message, then sending an error, then trying to
 	// verify, etc.
 	AllowSelfMessages bool
+
+	// Indicates whether the bot is currently running or not
+	running bool
 }
 
 // New returns a new Bot instance. name will set the Bot.Name and will show up next to the
